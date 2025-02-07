@@ -47,12 +47,54 @@
         padding: 20px;
         text-align: center;
     }
+
+    .summary-section {
+        margin: 20px 0;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        display: none;
+    }
+
+    .summary-content {
+        white-space: pre-line;
+        line-height: 1.6;
+    }
+
+    .button-group {
+        margin-bottom: 20px;
+    }
+
+    .button-group .btn {
+        margin-right: 10px;
+    }
+
+    #loadingSummary {
+        display: none;
+        margin: 10px 0;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="news-container">
-    <a href="{% url 'list_stock' %}" class="btn btn-primary">返回列表</a>
+    <div class="button-group">
+        <a href="{% url 'list_stock' %}" class="btn btn-primary">返回列表</a>
+        <button id="summarizeBtn" class="btn btn-success">生成新闻总结</button>
+    </div>
+
+    <div id="loadingSummary">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <span class="ms-2">正在生成总结，请稍候...</span>
+    </div>
+
+    <div id="summarySection" class="summary-section">
+        <h4>新闻总结</h4>
+        <div id="summaryContent" class="summary-content"></div>
+    </div>
+
     <h1>{{ code }} - 股票新闻</h1>
 
     {% if news_list %}
@@ -73,4 +115,52 @@
     <div class="empty">暂无新闻数据</div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('DOM加载完成');
+        const summarizeBtn = document.getElementById('summarizeBtn');
+        console.log('找到按钮元素:', summarizeBtn);
+
+        if (!summarizeBtn) {
+            console.error('未找到总结按钮元素！');
+        } else {
+            summarizeBtn.addEventListener('click', async function () {
+                const loadingEl = document.getElementById('loadingSummary');
+                const summarySection = document.getElementById('summarySection');
+                const summaryContent = document.getElementById('summaryContent');
+
+                console.log('开始生成总结...');
+
+                try {
+                    loadingEl.style.display = 'block';
+                    summarySection.style.display = 'none';
+
+                    const url = `/tubiao/news/{{ code }}/summary/`;
+                    console.log('请求URL:', url);
+
+                    const response = await fetch(url);
+                    console.log('响应状态:', response.status);
+
+                    if (!response.ok) {
+                        throw new Error(`获取总结失败: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    console.log('获取到的数据:', data);
+
+                    summaryContent.textContent = data.summary;
+                    summarySection.style.display = 'block';
+                } catch (error) {
+                    console.error('发生错误:', error);
+                    alert('生成总结时发生错误：' + error.message);
+                } finally {
+                    loadingEl.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

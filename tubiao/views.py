@@ -6,14 +6,8 @@ from .models import Stock
 
 from django.http import JsonResponse
 
-from . import ak_tools
+from . import ak_tools, llm_tools
 import json
-
-
-def list(request):
-    stocks = Stock.objects.all()
-    stock_data = [{"code": stock.code, "name": stock.name} for stock in stocks]
-    return JsonResponse(stock_data, safe=False)
 
 
 def list_stock(request):
@@ -51,4 +45,40 @@ def news_stock(request, code):
     return render(request, 'tubiao/news.html', context)
 
 
-# Create your views here.
+def news_summary(request, code):
+    """
+    生成股票新闻总结
+    """
+    news_list = ak_tools.get_stock_news(code)
+    summary = generate_news_summary(news_list)
+    return JsonResponse({'summary': summary})
+
+
+
+
+
+# help function
+def generate_news_summary(news_list):
+    """
+    使用LLM生成新闻总结
+    """
+    if not news_list:
+        return "暂无新闻可供总结"
+
+    # 构建提示词
+    prompt = "请对以下股票相关新闻进行总结：\n\n"
+
+    # 添加新闻内容
+    for news in news_list:
+        prompt += f"标题：{news['title']}\n"
+        prompt += f"时间：{news['time']}\n"
+        prompt += f"内容：{news['content']}\n\n"
+
+    prompt += "\n明确列出新闻中的关键信息，包括事件、影响、可能的后果等。"
+
+    # 调用LLM生成总结
+    try:
+        summary = llm_tools.get_llm_response(prompt)
+        return summary
+    except Exception as e:
+        return f"生成总结时发生错误：{str(e)}"
