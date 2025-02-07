@@ -12,11 +12,41 @@
         .stock-item {
             padding: 10px;
             border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .stock-item a {
+        .stock-info {
+            flex: 1;
+        }
+
+        .stock-info a {
             text-decoration: none;
             color: #333;
+        }
+
+        .stock-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 5px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            font-size: 14px;
+        }
+
+        .btn-chart {
+            background-color: #4CAF50;
+        }
+
+        .btn-news {
+            background-color: #2196F3;
         }
 
         .stock-item:hover {
@@ -31,9 +61,13 @@
         {% if stocks %}
         {% for stock in stocks %}
         <div class="stock-item">
-            <a href="{% url 'view_stock' stock.code %}">
+            <div class="stock-info">
                 {{ stock.code }} - {{ stock.name }}
-            </a>
+            </div>
+            <div class="stock-actions">
+                <a href="{% url 'view_stock' stock.code %}" class="btn btn-chart">图表</a>
+                <a href="{% url 'news_stock' stock.code %}" class="btn btn-news">新闻</a>
+            </div>
         </div>
         {% endfor %}
         {% else %}
