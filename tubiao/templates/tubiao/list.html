@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>股票列表</title>
+    <style>
+        .empty {
+            color: #666;
+            padding: 20px;
+        }
+
+        .stock-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>股票列表</h1>
+    <div id="stock-list">
+        {% if stocks %}
+        {% for stock in stocks %}
+        <div class="stock-item">{{ stock.code }} - {{ stock.name }}</div>
+        {% endfor %}
+        {% else %}
+        <div class="empty">暂无数据</div>
+        {% endif %}
+    </div>
+</body>
+
+</html>
