@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>股票利润图表</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        #profit-chart {
+            width: 800px;
+            height: 400px;
+            margin: 20px auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .stock-info {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>年度利润图表</h1>
+        <div class="stock-info">
+            <h2>{{ stock.code }} - {{ stock.name }}</h2>
+        </div>
+        <div id="profit-chart"></div>
+    </div>
+
+    <script>
+        // 初始化 ECharts 实例
+        var chartDom = document.getElementById('profit-chart');
+        var myChart = echarts.init(chartDom);
+
+        // Mock 数据
+        var data = {
+            years: ['2019', '2020', '2021', '2022', '2023'],
+            profits: [2500, 3200, 3800, 4200, 4800]
+        };
+
+        // 配置项
+        var option = {
+            title: {
+                text: '年度利润走势'
+            },
+            tooltip: {
+                trigger: 'axis',
+                formatter: '{b}年: {c}万元'
+            },
+            xAxis: {
+                type: 'category',
+                data: data.years,
+                name: '年份'
+            },
+            yAxis: {
+                type: 'value',
+                name: '利润(万元)'
+            },
+            series: [{
+                name: '年度利润',
+                type: 'bar',
+                data: data.profits,
+                itemStyle: {
+                    color: '#3398DB'
+                },
+                label: {
+                    show: true,
+                    position: 'top',
+                    formatter: '{c}万'
+                }
+            }]
+        };
+
+        // 使用配置项显示图表
+        myChart.setOption(option);
+    </script>
+</body>
+
+</html>

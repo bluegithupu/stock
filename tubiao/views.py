@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 from django.http import HttpResponse
 
@@ -16,6 +16,11 @@ def list(request):
 def listPage(request):
     stocks = Stock.objects.all()
     return render(request, "tubiao/list.html", {'stocks': stocks})
+
+
+def view_stock(request, code):
+    stock = get_object_or_404(Stock, code=code)
+    return render(request, "tubiao/view.html", {'stock': stock})
 
 
 # Create your views here.
