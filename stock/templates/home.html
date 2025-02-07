@@ -1,55 +1,48 @@
-<!DOCTYPE html>
-<html>
+{% extends 'base.html' %}
 
-<head>
-    <title>项目路由列表</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 2rem;
-        }
+{% block title %}项目路由列表{% endblock %}
 
-        h1 {
-            color: #333;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 0.5rem;
-        }
+{% block extra_style %}
+<style>
+    h1 {
+        color: #333;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 0.5rem;
+    }
 
-        ul {
-            list-style: none;
-            padding: 0;
-        }
+    ul {
+        list-style: none;
+        padding: 0;
+    }
 
-        li {
-            margin: 0.5rem 0;
-        }
+    li {
+        margin: 0.5rem 0;
+    }
 
-        a {
-            color: #007bff;
-            text-decoration: none;
-            padding: 0.3rem 0.5rem;
-            border-radius: 4px;
-        }
+    a {
+        color: #007bff;
+        text-decoration: none;
+        padding: 0.3rem 0.5rem;
+        border-radius: 4px;
+    }
 
-        a:hover {
-            background-color: #f8f9fa;
-            text-decoration: underline;
-        }
-    </style>
-</head>
+    a:hover {
+        background-color: #f8f9fa;
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
 
-<body>
-    <h1>已注册应用路径 (共 {{ routes|length }} 个)</h1>
-    <ul>
-        {% for path, view in routes %}
-        <li>
-            <a href="/{{ path|default:'/' }}">/{{ path|default:'/' }}</a>
-            <span style="color: #666;">-- {{ view }} 视图</span>
-        </li>
-        {% empty %}
-        <li>暂无注册路由</li>
-        {% endfor %}
-    </ul>
-</body>
-
-</html>
+{% block content %}
+<h1>已注册应用路径 (共 {{ routes|length }} 个)</h1>
+<ul>
+    {% for path, view in routes %}
+    <li>
+        <a href="/{{ path|default:'/' }}">/{{ path|default:'/' }}</a>
+        <span style="color: #666;">-- {{ view }} 视图</span>
+    </li>
+    {% empty %}
+    <li>暂无注册路由</li>
+    {% endfor %}
+</ul>
+{% endblock %}

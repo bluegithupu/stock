@@ -16,7 +16,7 @@ def list(request):
     return JsonResponse(stock_data, safe=False)
 
 
-def listPage(request):
+def list_stock(request):
     stocks = Stock.objects.all()
     return render(request, "tubiao/list.html", {'stocks': stocks})
 
