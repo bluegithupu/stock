@@ -15,9 +15,24 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import include,path
+from django.urls import include, path
+from django.shortcuts import render
+from django.urls.resolvers import URLResolver, URLPattern
+
+
+def list_routes(request):
+    """展示主要应用路由"""
+    routes = []
+    for pattern in urlpatterns:
+        if isinstance(pattern, URLResolver):
+            path = str(pattern.pattern)
+            view_name = path.rstrip('/').capitalize()
+            routes.append((path, view_name))
+    return render(request, 'home.html', {'routes': routes})
+
 
 urlpatterns = [
+    path("", list_routes, name="home"),  # 添加首页路由
     path("tubiao/", include("tubiao.urls")),
     path("admin/", admin.site.urls),
 ]
