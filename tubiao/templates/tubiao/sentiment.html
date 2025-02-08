@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}市场情绪{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>市场情绪指标</h2>
+    {% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body">
+            <div id="sentimentChart" style="height: 600px;"></div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var dates = JSON.parse('{{ dates|safe }}');
+        var sentimentValues = JSON.parse('{{ sentiment_values|safe }}');
+        var indexValues = JSON.parse('{{ index_values|safe }}');
+
+        var chart = echarts.init(document.getElementById('sentimentChart'));
+
+        var option = {
+            title: {
+                text: '市场情绪与沪深300指数'
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross'
+                }
+            },
+            legend: {
+                data: ['市场情绪指数', '沪深300指数']
+            },
+            grid: {
+                right: '20%'
+            },
+            xAxis: {
+                type: 'category',
+                data: dates,
+                axisLabel: {
+                    rotate: 45
+                }
+            },
+            yAxis: [{
+                type: 'value',
+                name: '市场情绪指数',
+                position: 'left'
+            }, {
+                type: 'value',
+                name: '沪深300指数',
+                position: 'right'
+            }],
+            series: [{
+                name: '市场情绪指数',
+                type: 'line',
+                data: sentimentValues,
+                yAxisIndex: 0,
+                lineStyle: {
+                    color: '#5470C6'
+                }
+            }, {
+                name: '沪深300指数',
+                type: 'line',
+                data: indexValues,
+                yAxisIndex: 1,
+                lineStyle: {
+                    color: '#91CC75'
+                }
+            }]
+        };
+
+        chart.setOption(option);
+
+        window.addEventListener('resize', function () {
+            chart.resize();
+        });
+    });
+</script>
+{% endblock %}

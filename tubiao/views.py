@@ -54,7 +54,20 @@ def news_summary(request, code):
     return JsonResponse({'summary': summary})
 
 
+def sentiment(request):
+    """市场情绪页面"""
+    try:
+        # 获取市场情绪数据
+        dates, sentiment_values, index_values = ak_tools.get_market_sentiment()
 
+        context = {
+            'dates': json.dumps(dates),
+            'sentiment_values': json.dumps(sentiment_values),
+            'index_values': json.dumps(index_values),
+        }
+        return render(request, 'tubiao/sentiment.html', context)
+    except Exception as e:
+        return render(request, 'tubiao/sentiment.html', {'error': str(e)})
 
 
 # help function

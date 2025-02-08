@@ -1,4 +1,5 @@
 import akshare as ak
+import pandas as pd
 
 
 def convert_profit(profit_str):
@@ -84,3 +85,28 @@ def get_stock_news(code, limit=10):
     except Exception as e:
         print(f"获取股票{code}新闻数据失败: {str(e)}")
         return []
+
+
+def get_market_sentiment():
+    """
+    获取市场情绪指数数据
+    Returns:
+        tuple: (dates, sentiment_values, index_values)
+        - dates: 日期列表
+        - sentiment_values: 市场情绪指数列表
+        - index_values: 沪深300指数列表
+    """
+    try:
+        df = ak.index_news_sentiment_scope()
+
+        # 确保日期列为datetime格式
+        df['日期'] = pd.to_datetime(df['日期'])
+
+        # 转换数据格式
+        dates = df['日期'].dt.strftime('%Y-%m-%d').tolist()
+        sentiment_values = df['市场情绪指数'].tolist()
+        index_values = df['沪深300指数'].tolist()
+
+        return dates, sentiment_values, index_values
+    except Exception as e:
+        raise Exception(f"获取市场情绪数据失败: {str(e)}")

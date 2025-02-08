@@ -7,11 +7,20 @@ stock_code = "000063"
 profit_data = ak.stock_financial_benefit_ths(symbol=stock_code, indicator="按报告期")
 
 # 查看所有列名
-print("所有列名：", profit_data.columns)
+# print("所有列名：", profit_data.columns)
 
 # 选择指定列，例如选择 "报告期"、"营业总收入" 和 "净利润"
 selected_columns = ["报告期","*净利润"]
 filtered_data = profit_data[selected_columns]
 
 # 打印指定列的数据
+print(filtered_data)
+
+
+
+stock_fhps_detail_em_df = ak.stock_fhps_detail_em(symbol=stock_code)
+
+# 指定列 现金分红-股息率
+selected_columns = ["报告期","现金分红-股息率"]
+filtered_data = stock_fhps_detail_em_df[selected_columns]
 print(filtered_data)
