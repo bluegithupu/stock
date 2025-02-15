@@ -2,3 +2,4 @@ akshare==1.15.87
 Django==5.1.6
 openai==1.63.0
 pandas==2.2.3
+gunicorn==21.2.0
