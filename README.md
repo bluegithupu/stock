@@ -5,6 +5,12 @@
 conda base
 
 
+# 生成依赖
+
+pip install pipreqs
+pipreqs ./
+
+
 # stock
 
 ```mermaid
