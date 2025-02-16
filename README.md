@@ -11,6 +11,10 @@ pip install pipreqs
 pipreqs ./
 
 
+# Sealos 自动部署
+https://mp.weixin.qq.com/s/RA64X17v3x9oStCP6oxh3w
+
+
 # stock
 
 ```mermaid
