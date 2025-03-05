@@ -49,6 +49,7 @@
         <div class="stock-actions">
             <a href="{% url 'view_stock' stock.code %}" class="btn btn-success">图表</a>
             <a href="{% url 'news_stock' stock.code %}" class="btn btn-info">新闻</a>
+            <a href="{% url 'xueqiu_summary' stock.code %}" class="btn btn-primary">雪球</a>
         </div>
     </div>
     {% endfor %}

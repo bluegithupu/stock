@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>雪球讨论汇总</title>
+    <meta charset="utf-8">
+    <style>
+        .summary-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .discussion-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="summary-container">
+        <h2>{{ stock_code }} - 雪球讨论汇总</h2>
+        <div class="summary-section">
+            <h3>AI 总结</h3>
+            <div>{{ summary }}</div>
+        </div>
+        <h3>最新讨论</h3>
+        {% for item in discussions %}
+        <div class="discussion-item">
+            <p>{{ item.text }}</p>
+            <small>{{ item.user_name }} - {{ item.created_at }}</small>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

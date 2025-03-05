@@ -21,4 +21,23 @@ def get_llm_response(prompt, model="gpt-3.5-turbo"):
     )
     return response.choices[0].message.content
 
-# print(get_llm_response("hello"))
+
+def summarize_xueqiu_discussions(discussions):
+    """使用 LLM 总结雪球讨论内容"""
+    if not discussions:
+        return "暂无相关讨论"
+        
+    # 将讨论内容整理成文本
+    text = "\n".join([f"- {d['text']}" for d in discussions])
+    
+    prompt = f"""请分析以下雪球股票讨论内容，并给出简要总结：
+
+{text}
+
+请从以下几个方面总结：
+1. 投资者主要关注点
+2. 市场情绪倾向（看多/看空）
+3. 重要信息要点
+"""
+    
+    return get_llm_response(prompt)

@@ -2,12 +2,23 @@ from django.shortcuts import render, get_object_or_404
 
 from django.http import HttpResponse
 
+from tubiao.xueqiu_crawler import get_xueqiu_discussions
+
 from .models import Stock
 
 from django.http import JsonResponse
 
 from . import ak_tools, llm_tools
 import json
+
+
+def xueqiu_summary(request, code):
+    discussions = get_xueqiu_discussions(code)
+    summary = llm_tools.summarize_xueqiu_discussions(discussions)
+    return render(request, 'tubiao/xueqiu_summary.html', 
+                         {'stock_code': code,
+                         'discussions': discussions,
+                         'summary': summary})
 
 
 def list_stock(request):
