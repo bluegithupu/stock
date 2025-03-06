@@ -11,4 +11,5 @@ urlpatterns = [
     path('news/<str:code>/', views.news_stock, name='news_stock'),
     path('sentiment/', views.sentiment, name='sentiment'),
     path('xueqiu/<str:code>/', views.xueqiu_summary, name='xueqiu_summary'),
+    path('xueqiu/<str:code>/summary/', views.generate_xueqiu_summary, name='generate_xueqiu_summary'),
 ]

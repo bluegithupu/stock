@@ -1,24 +1,70 @@
 from django.shortcuts import render, get_object_or_404
-
 from django.http import HttpResponse
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 from tubiao.xueqiu_crawler import get_xueqiu_discussions
-
 from .models import Stock
-
-from django.http import JsonResponse
-
 from . import ak_tools, llm_tools
 import json
+import os
+import tempfile
+import pickle
+from datetime import datetime, timedelta
 
+
+def get_cached_discussions(code):
+    """从缓存获取讨论内容，如果缓存不存在或已过期则重新爬取"""
+    # 项目根目录
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # 创建 tmp 文件夹（如果不存在）
+    temp_dir = os.path.join(base_dir, 'tmp')
+    if not os.path.exists(temp_dir):
+        os.makedirs(temp_dir)
+    cache_file = os.path.join(temp_dir, f'xueqiu_discussions_{code}.pkl')
+    
+    # 检查缓存文件是否存在且未过期（24小时内）
+    if os.path.exists(cache_file):
+        file_mod_time = datetime.fromtimestamp(os.path.getmtime(cache_file))
+        if datetime.now() - file_mod_time < timedelta(hours=24):
+            try:
+                with open(cache_file, 'rb') as f:
+                    return pickle.load(f)
+            except Exception as e:
+                print(f"读取缓存文件出错: {e}")
+    
+    # 缓存不存在或已过期，重新爬取
+    discussions = get_xueqiu_discussions(code)
+    
+    # 保存到缓存
+    try:
+        with open(cache_file, 'wb') as f:
+            pickle.dump(discussions, f)
+    except Exception as e:
+        print(f"保存缓存文件出错: {e}")
+    
+    return discussions
 
 def xueqiu_summary(request, code):
-    discussions = get_xueqiu_discussions(code)
-    summary = llm_tools.summarize_xueqiu_discussions(discussions)
+    # 获取雪球讨论数据（使用缓存）
+    discussions = get_cached_discussions(code)
+    
+    # 首次加载时不生成总结
     return render(request, 'tubiao/xueqiu_summary.html', 
-                         {'stock_code': code,
-                         'discussions': discussions,
-                         'summary': summary})
+                 {'stock_code': code,
+                  'discussions': discussions,
+                  'summary': ''})
+
+
+@csrf_exempt
+def generate_xueqiu_summary(request, code):
+    """生成雪球讨论的AI总结并返回JSON响应"""
+    if request.method == 'POST':
+        # 使用缓存的讨论数据，避免重复爬取
+        discussions = get_cached_discussions(code)
+        summary = llm_tools.summarize_xueqiu_discussions(discussions)
+        return JsonResponse({'summary': summary})
+    return JsonResponse({'error': '方法不允许'}, status=405)
 
 
 def list_stock(request):

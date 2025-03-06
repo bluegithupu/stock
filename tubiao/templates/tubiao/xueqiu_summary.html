@@ -1,36 +1,209 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>雪球讨论汇总</title>
-    <meta charset="utf-8">
-    <style>
-        .summary-container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+{% extends "base.html" %}
+
+{% block title %}{{ stock_code }} - 雪球讨论汇总{% endblock %}
+
+{% block extra_style %}
+<style>
+    .summary-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .ai-summary {
+        background-color: #f5f5f5;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    
+    /* Markdown样式 */
+    .ai-summary h2 {
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-size: 1.5em;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+    }
+    
+    .ai-summary ul {
+        padding-left: 20px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .ai-summary li {
+        margin-bottom: 5px;
+    }
+    
+    .ai-summary p {
+        margin-bottom: 10px;
+    }
+    .ai-summary-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .discussion-item {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+    }
+    .discussion-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .discussion-content {
+        margin-bottom: 5px;
+    }
+    .discussion-meta {
+        color: #666;
+        font-size: 0.9em;
+    }
+    .toggle-button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 14px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .toggle-button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+    }
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #4CAF50;
+        animation: spin 1s ease-in-out infinite;
+        margin-left: 10px;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+{% block extra_head %}
+<!-- 添加marked.js库用于解析Markdown -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+    function fetchAiSummary() {
+        var summaryContent = document.getElementById('ai-summary-content');
+        var toggleButton = document.getElementById('toggle-button');
+        var loadingIndicator = document.getElementById('loading-indicator');
+        
+        // 显示加载指示器
+        loadingIndicator.style.display = 'block';
+        summaryContent.innerHTML = '正在生成AI总结...';
+        summaryContent.style.display = 'block';
+        
+        // 禁用按钮防止重复点击
+        toggleButton.disabled = true;
+        toggleButton.textContent = '正在生成...';
+        
+        // 发送POST请求到后端生成总结
+        fetch('{% url "generate_xueqiu_summary" stock_code %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            // 隐藏加载指示器
+            loadingIndicator.style.display = 'none';
+            
+            // 更新总结内容，并将Markdown转换为HTML
+            summaryContent.innerHTML = marked.parse(data.summary);
+            
+            // 重新启用按钮
+            toggleButton.disabled = false;
+            toggleButton.textContent = '隐藏AI总结';
+            toggleButton.onclick = toggleAiSummary;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            summaryContent.innerHTML = '生成总结时出错，请重试';
+            loadingIndicator.style.display = 'none';
+            toggleButton.disabled = false;
+            toggleButton.textContent = '重新生成AI总结';
+        });
+    }
+    
+    function toggleAiSummary() {
+        var summaryContent = document.getElementById('ai-summary-content');
+        var toggleButton = document.getElementById('toggle-button');
+        
+        if (summaryContent.style.display === 'none') {
+            summaryContent.style.display = 'block';
+            toggleButton.textContent = '隐藏AI总结';
+        } else {
+            summaryContent.style.display = 'none';
+            toggleButton.textContent = '显示AI总结';
         }
-        .discussion-item {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
+    }
+    
+    // 获取CSRF Token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
         }
-    </style>
-</head>
-<body>
-    <div class="summary-container">
-        <h2>{{ stock_code }} - 雪球讨论汇总</h2>
-        <div class="summary-section">
-            <h3>AI 总结</h3>
-            <div>{{ summary }}</div>
+        return cookieValue;
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="summary-container">
+    <h2>{{ stock_code }} - 雪球讨论汇总</h2>
+        
+        <!-- AI总结部分 -->
+        <div class="ai-summary">
+            <div class="ai-summary-header">
+                <h3>AI 总结</h3>
+                <button id="toggle-button" class="toggle-button" onclick="fetchAiSummary()">生成AI总结</button>
+                <div id="loading-indicator" style="display: none;">
+                    <span class="spinner"></span>
+                </div>
+            </div>
+            <div id="ai-summary-content" style="display: none;">{{ summary }}</div>
         </div>
-        <h3>最新讨论</h3>
+        
+        <!-- 讨论列表 -->
+        <h3>最新讨论 ({{ discussions|length }}条)</h3>
         {% for item in discussions %}
         <div class="discussion-item">
-            <p>{{ item.text }}</p>
-            <small>{{ item.user_name }} - {{ item.created_at }}</small>
+            {% if item.title %}
+            <div class="discussion-title">{{ item.title }}</div>
+            {% endif %}
+            <div class="discussion-content">{{ item.content }}</div>
+            <div class="discussion-meta">
+                <span>{{ item.user_name }}</span>
+                {% if item.time %} - <span>{{ item.time }}</span>{% endif %}
+                {% if item.link %} - <a href="{{ item.link }}" target="_blank">查看原文</a>{% endif %}
+            </div>
         </div>
+        {% empty %}
+        <p>暂无讨论数据</p>
         {% endfor %}
     </div>
-</body>
-</html>
+{% endblock %}
